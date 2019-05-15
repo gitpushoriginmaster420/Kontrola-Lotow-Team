@@ -9,18 +9,6 @@ namespace Kontrola_Lotów
 {
     class Baza
     {
-        public void insert(int x, int y, string s)
-        {
-            Console.SetCursorPosition(x - 1, y - 1);
-            Console.Write(s);
-        }
-        public void czyscKonsole()
-        {
-            for(int i=29;i<49;i++)
-            {
-                insert(136, i, "                                                                       ");
-            }
-        }
         string[] wierza;
         public Baza(Radar r)            // tworzenie mapy wymaga wczytania 2 plikow: wierza.txt, radar.txt
         {
@@ -33,6 +21,18 @@ namespace Kontrola_Lotów
             }
         }
         public Baza() { }
+        public void insert(int x, int y, string s)
+        {
+            Console.SetCursorPosition(x - 1, y - 1);
+            Console.Write(s);
+        }
+        public void czyscKonsole()
+        {
+            for(int i=29;i<49;i++)
+            {
+                insert(136, i, "                                                                       ");
+            }
+        }
         public void save()              // zapisuje stan radaru do pliku
         {
             // zapisywanie mapy
@@ -58,10 +58,44 @@ namespace Kontrola_Lotów
         {
             insert(136, 29, "Dane lotu " + r.s[i].typ);
         }
+        public void pokaSamolot(ref Trasa pozycja)
+        {
+            string[,] samolot = new string[3,2];
+            int tmp = 1;
+            samolot[0, 1] = "\\''-................_ ";
+            samolot[1, 1] = "'-.___-=====-_______.'";
+            samolot[2, 1] = " oo oo      o ";
+            samolot[0, 0] = ".........._ ";
+            samolot[1, 0] = "==-_______.'";
+            samolot[2, 0] = "  o ";
+
+            for (int i=1;i<8;i++)
+            insert(1, i, wierza[i-1]);
+            if (pozycja.x == 1) tmp = 0;
+
+            insert(pozycja.x, pozycja.y + 1, samolot[0,tmp]);
+            insert(pozycja.x+1, pozycja.y + 2, samolot[1,tmp]);
+            insert(pozycja.x+7, pozycja.y + 3, samolot[2,tmp]);
+
+            if (pozycja.y < 4 ) pozycja.y++;
+            pozycja.x += pozycja.s/30;
+            if (pozycja.s > 35) pozycja.s = 10 * pozycja.s / 11;
+            if (pozycja.x > 120) pozycja.s=0;
+
+            insert(6, 2, "|    ||");
+            insert(6, 3, "|    ||");
+            insert(6, 4, "|    ||");
+        }
     }
     class Trasa
     {
         public int x, y, s;
+        public Trasa()
+        {
+            x = 1;
+            y = 1;
+            s = 300;
+        }
     }
     class Statek
     {
@@ -129,6 +163,7 @@ namespace Kontrola_Lotów
 
             Radar radar = new Radar();
             Baza b = new Baza(radar);
+            Trasa losowySamolot = new Trasa();
 
             b.pokaInterfejs();
             int ms = 0 ;
@@ -139,10 +174,10 @@ namespace Kontrola_Lotów
                 b.pokaListeLotow(radar,czy);                        // wypisuje liste lotow do podgledu/edycji
                 b.insert(200,26,Convert.ToString(ms/10+" s"));      // wypisuje czas trwania programu
                 b.insert(212, 51, Convert.ToString("."));           // wypisuje nic na koncu okna
-
-                if (Console.KeyAvailable)
+                
+                if (Console.KeyAvailable)                           // pobiera wybrany przycisk
                 {
-                    char wybor = Console.ReadKey().KeyChar;         // pobiera wybrany przycisk
+                    char wybor = Console.ReadKey().KeyChar;
                     int i = wybor - 49;
                     if(czy>0)
                     {
@@ -162,11 +197,16 @@ namespace Kontrola_Lotów
                     {
                         // wypisz info o autorach
                     }
+                    else if (wybor == 'w')
+                    {
+                        losowySamolot = new Trasa();
+                    }
                 }
-
+                
                 Thread.Sleep(100);
                 ms++;
 
+                if (losowySamolot.s != 0) b.pokaSamolot(ref losowySamolot);
             }
         }
     }
