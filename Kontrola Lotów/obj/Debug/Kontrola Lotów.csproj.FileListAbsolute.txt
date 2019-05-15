@@ -1,0 +1,8 @@
+C:\Users\student\Desktop\Kontrola Lotów\bin\Debug\Kontrola Lotów.exe.config
+C:\Users\olgie\Desktop\Kontrola Lotów\bin\Debug\Kontrola Lotów.exe.config
+C:\Users\olgie\Desktop\Kontrola Lotów\bin\Debug\Kontrola Lotów.exe
+C:\Users\olgie\Desktop\Kontrola Lotów\bin\Debug\Kontrola Lotów.pdb
+C:\Users\olgie\Desktop\Kontrola Lotów\obj\Debug\Kontrola Lotów.csprojAssemblyReference.cache
+C:\Users\olgie\Desktop\Kontrola Lotów\obj\Debug\Kontrola Lotów.csproj.CoreCompileInputs.cache
+C:\Users\olgie\Desktop\Kontrola Lotów\obj\Debug\Kontrola Lotów.exe
+C:\Users\olgie\Desktop\Kontrola Lotów\obj\Debug\Kontrola Lotów.pdb
