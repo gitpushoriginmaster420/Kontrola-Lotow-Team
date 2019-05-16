@@ -60,31 +60,54 @@ namespace Kontrola_Lotów
         }
         public void pokaSamolot(ref Trasa pozycja)
         {
-            string[,] samolot = new string[3,2];
-            int tmp = 1;
-            samolot[0, 1] = "\\''-................_ ";
-            samolot[1, 1] = "'-.___-=====-_______.'";
-            samolot[2, 1] = " oo oo      o ";
-            samolot[0, 0] = ".........._ ";
-            samolot[1, 0] = "==-_______.'";
-            samolot[2, 0] = "  o ";
+            int tmp = 3;
+            string[] samolot = System.IO.File.ReadAllLines("samolot.txt");
+            for (int i=1;i<22;i++) insert(1, i, wierza[i-1]);
+            if (pozycja.x < 116)    // przesuwanie sie w prawo
+            {
+                if (pozycja.x == 1) tmp = 0;
+                
+                insert(pozycja.x, pozycja.y + 1, samolot[0 + tmp]);
+                insert(pozycja.x + 1, pozycja.y + 2, samolot[1 + tmp]);
+                insert(pozycja.x + 7, pozycja.y + 3, samolot[2 + tmp]);
 
-            for (int i=1;i<8;i++)
-            insert(1, i, wierza[i-1]);
-            if (pozycja.x == 1) tmp = 0;
+                if (pozycja.y < 4 ) pozycja.y++;
+                pozycja.x += pozycja.s/16;                                  // predkosc opadania (mniej-dluzej)
+                if (pozycja.s > 35) pozycja.s = pozycja.s * 9 / 10;        // hamowanie (mniej-szybsze)
 
-            insert(pozycja.x, pozycja.y + 1, samolot[0,tmp]);
-            insert(pozycja.x+1, pozycja.y + 2, samolot[1,tmp]);
-            insert(pozycja.x+7, pozycja.y + 3, samolot[2,tmp]);
+                insert(6, 3, "|    ||");
+                insert(6, 4, "|    ||");
+                insert(6, 5, "|    ||");
+            }
+            else if (pozycja.y<22)   // przesuwanie w dol
+            {
+                pozycja.y++;
+                pozycja.x++;
 
-            if (pozycja.y < 4 ) pozycja.y++;
-            pozycja.x += pozycja.s/30;
-            if (pozycja.s > 35) pozycja.s = 10 * pozycja.s / 11;
-            if (pozycja.x > 120) pozycja.s=0;
-
-            insert(6, 2, "|    ||");
-            insert(6, 3, "|    ||");
-            insert(6, 4, "|    ||");
+                if (pozycja.y < 7)
+                {
+                    pozycja.y--;
+                    pozycja.x += 4;
+                    insert(pozycja.x + 1, pozycja.y + 0, samolot[6]);
+                    insert(pozycja.x + 0, pozycja.y + 1, samolot[7]);
+                    insert(pozycja.x + 3, pozycja.y + 2, samolot[8]);
+                    insert(pozycja.x + 0, pozycja.y + 3, samolot[9]);
+                    insert(pozycja.x + 0, pozycja.y + 4, samolot[10]);
+                    insert(pozycja.x + 6, pozycja.y + 5, samolot[11]);
+                    pozycja.y++;
+                }
+                else
+                {
+                    insert(pozycja.x + 4, pozycja.y + 0, samolot[12]);
+                    insert(pozycja.x + 6, pozycja.y + 1, samolot[13]);
+                    insert(pozycja.x + 0, pozycja.y + 2, samolot[14]);
+                    insert(pozycja.x + 1, pozycja.y + 3, samolot[15]);
+                    insert(pozycja.x + 8, pozycja.y + 4, samolot[16]);
+                    insert(pozycja.x + 9, pozycja.y + 5, samolot[17]);
+                }
+                for (int i = 22; i < 28; i++) insert(1, i, wierza[i - 1]);
+            }
+            else pozycja.s = 0;
         }
     }
     class Trasa
@@ -93,8 +116,8 @@ namespace Kontrola_Lotów
         public Trasa()
         {
             x = 1;
-            y = 1;
-            s = 300;
+            y = 2;
+            s = 200;
         }
     }
     class Statek
@@ -130,9 +153,13 @@ namespace Kontrola_Lotów
                     switch (s[i].d)
                     {
                         case 0: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].x++; break;
-                        case 1: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].y++; break;
-                        case 2: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].x--; break;
-                        case 3: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].y--; break;
+                        case 1: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].x++; s[i].y++; break;
+                        case 2: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].y++; break;
+                        case 3: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].x--; s[i].y++; break;
+                        case 4: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].y--; break;
+                        case 5: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].x--; s[i].y--; break;
+                        case 6: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].x--; break;
+                        case 7: b.insert(14 + s[i].x, 19 + s[i].y, "   "); s[i].x++; s[i].y--; break;
                     }
                     b.insert(14+s[i].x, 19+s[i].y, s[i].typ);
                 }
