@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Drawing;
-using System.Text;
 using System.Threading;
 
 namespace Kontrola_Lotów
@@ -75,8 +72,9 @@ namespace Kontrola_Lotów
             string xx = "", yy = "";
             if (i>=0)
             {
+                czyscKonsole();
                 if (r.s[i].x < 19) xx = "0";
-                if (r.s[i].y < 19) yy = "0";
+                if (r.s[i].y < 10) yy = "0";
                 insert(138, 29, "Dane lotu: " + r.s[i].typ);
                 insert(138, 30, "----------------------------------------------------------------------");
                 insert(138, 32, "Wspolrzedne geograficzne: (4." + yy + r.s[i].y + "' S, 21." + xx + (r.s[i].x+1)/2 + "' E)");
@@ -101,8 +99,8 @@ namespace Kontrola_Lotów
                 insert(pozycja.x + 7, pozycja.y + 3, samolot[2 + tmp]);
 
                 if (pozycja.y < 4 ) pozycja.y++;
-                pozycja.x += pozycja.s/16;                                 // predkosc opadania (mniej-dluzej)
-                if (pozycja.s > 35) pozycja.s = pozycja.s * 9 / 10;        // hamowanie (mniej-szybsze)
+                pozycja.x += pozycja.v/16;                                 // predkosc opadania (mniej-dluzej)
+                if (pozycja.v > 35) pozycja.v = pozycja.v * 9 / 10;        // hamowanie (mniej-szybsze)
 
                 insert(6, 3, "|    ||");
                 insert(6, 4, "|    ||");
@@ -136,19 +134,19 @@ namespace Kontrola_Lotów
                 }
                 for (int i = 22; i < 28; i++) insert(1, i, wierza[i - 1]);
             }
-            else pozycja.s = 0;
+            else pozycja.v = 0;
         }
     }
     class Trasa
     {
-        public int x, y, h, d, s;
-        public Trasa(int xx,int yy, int hh, int dd, int ss)
+        public int x, y, h, d, v;
+        public Trasa(int xx,int yy, int hh, int dd, int vv)
         {
             x = xx;
             y = yy;
             h = hh;
             d = dd;
-            s = ss;
+            v = vv;
         }
     }
     class Statek
@@ -156,7 +154,7 @@ namespace Kontrola_Lotów
         public string typ,stanLotu;
         public int x, y, h, d, v;   // [x,y,h]- wspolrzedne, d- kierunek, v- predkosc
         public int szybkosc;
-        public int traiektoria;
+        public int trajektoria;
         List<Trasa> tr;             // traiektoria
         public Statek(string[] dane)
         {
@@ -167,86 +165,98 @@ namespace Kontrola_Lotów
             d = int.Parse(dane[4]);
             v = int.Parse(dane[5]);
             szybkosc = 0;
-            traiektoria = 0;
-            ustalTraiektorie(x, y, d);
+            trajektoria = 0;
+            ustalTrajektorie(x, y, d);
             stanLotu = "Spoko";
         }
-        public Statek()
+        public Statek(int xx,int yy,int hh,int dd,int vv)
         {
             typ = "";
-            x = 0;
-            y = 0;
-            h = 0;
-            d = 0;
-            v = 0;
+            x = xx;
+            y = yy;
+            h = hh;
+            d = dd;
+            v = vv;
             szybkosc = 0;
-            traiektoria = 0;
-            ustalTraiektorie(x, y, d);
+            trajektoria = 0;
             stanLotu = "";
         }
-        public void ustalTraiektorie(int x_cel,int y_cel,int direct)
+        public void ustalTrajektorie(int x_cel, int y_cel, int direct)
         {
             tr = new List<Trasa>();
-            tr.Add(new Trasa(x, y, h, d, 0));
-            int i = 1;
-            int xx = x, yy = y, hh = h, dd = d, vv = v;
-
-            /*
-            if(x_cel!=x || y_cel!=y)    // znajdz korzystniejsza trase
+            tr.Add(new Trasa(x, y, h, d, v));
+            double bok = v * v * 0.00000670162031;     // dlugosc boku osmiokata
+            if (x_cel != x || y_cel != y)           // znajdz trase do podanego celu
             {
-                Statek s1 = new Statek();
-                while()
+                Statek s1 = new Statek(x,y,h,d,v);
+                s1.tr = new List<Trasa>();
+                s1.tr.Add(new Trasa(x, y, h, d, v));
+                for (int kk=0;kk<7;kk++)
                 {
-                    s1.ustalTraiektorie()
+                    double dl_bok = bok;
+                    if (s1.d % 4 == 0) dl_bok = Math.Round(dl_bok * 2);         // poziom
+                    else if (s1.d % 4 == 2) dl_bok = Math.Round(dl_bok * 1);    // pion
+                    else if (s1.d % 2 == 1) dl_bok = Math.Round(dl_bok * 0.71); // skos
+
+                    for (int ii=0;ii< dl_bok;ii++)
+                        plusTrajektorie(ref s1.tr,s1.d);
+
+                    s1.d = (s1.d+1)%8;
                 }
+                tr.AddRange(s1.tr);
             }
-            */
 
-            while(xx<96 && yy<32 && xx > 0 && yy > 0)
+            int i = tr.Count-1;
+            while (tr[i].x < 96 && tr[i].y < 32 && tr[i].x > 0 && tr[i].y > 0)  // kontynuluj lot prosto
             {
-                switch(dd)
-                {
-                    case 0:  xx++; break;
-                    case 1:  xx+=2; yy++; break;
-                    case 2:  yy++; break;
-                    case 3:  xx-=2; yy++; break;
-                    case 4:  xx--; break;
-                    case 5:  xx-=2; yy--; break;
-                    case 6:  yy--; break;
-                    case 7:  xx+=2; yy--; break;
-                }
-                vv++;
-                tr.Add(new Trasa(xx,yy,hh,dd,vv));
                 i = tr.Count - 1;
-                xx = tr[i].x;
-                yy = tr[i].y;
-                hh = tr[i].h;
-                dd = tr[i].d;
-                vv = tr[i].s;
+                plusTrajektorie(ref tr,tr[i].d);    // dodaje nastepna kratke
             }
         }
-        public void pokaTraiektorie()
+        public void pokaTrajektorie()
         {
             Baza b =new Baza();
             for(int i=1;i<tr.Count;i++)
             {
                 if (tr[i].d % 4 == 0 && tr[i].x % 2 == 1) b.insert(11 + tr[i].x, 18 + tr[i].y, " ");
-                else b.insert(11 + tr[i].x, 18 + tr[i].y, "^");
+                else b.insert(11 + tr[i].x, 18 + tr[i].y, Convert.ToString(tr[i].d));
             }
         }
-        public void aktualizujTraiektorie()
+        public void aktualizujTrajektorie()
         {
             tr.RemoveAt(1);
         }
-        public void zmienTraiektorie()
+        public void zmienTrajektorie()
         {
             Baza b = new Baza();
             b.insert(138, 40, "Podaj nowe wspolrzedne: S 21.");
             int y = Convert.ToInt32(Console.ReadLine());
             b.insert(169, 40, ", E 4.");
             int x = Convert.ToInt32(Console.ReadLine());
-            ustalTraiektorie(x, y, d);
+            ustalTrajektorie(x, y, d);
             b.insert(138, 40, "                                         ");
+        }
+        public void plusTrajektorie(ref List<Trasa> tr,int dd)
+        {
+            int i = tr.Count-1;
+            int xx = tr[i].x, yy = tr[i].y, hh = tr[i].h, vv = tr[i].v;
+            switch (dd)
+            {
+                case 0: xx++; break;
+                case 1: xx += 2; yy++; break;
+                case 2: yy++; break;
+                case 3: xx -= 2; yy++; break;
+                case 4: xx--; break;
+                case 5: xx -= 2; yy--; break;
+                case 6: yy--; break;
+                case 7: xx += 2; yy--; break;
+            }
+            vv++;
+            tr.Add(new Trasa(xx, yy, hh, dd, vv));
+        }
+        public int getDTrajektorii()
+        {
+            return tr[1].d;
         }
     }
     class Radar
@@ -261,6 +271,7 @@ namespace Kontrola_Lotów
                 b.insert(10, 18 + i, mapa[i]);
             for (int i = 0; i < s.Count; i++)
                 {
+                    s[i].d = s[i].getDTrajektorii();
                     s[i].szybkosc += 1;
                     if ((32000 / s[i].v) <= s[i].szybkosc && s[i].d % 2 == 1)        // 560km/h - 1k/2.23s      (skos)
                     {
@@ -272,7 +283,7 @@ namespace Kontrola_Lotów
                             case 7:s[i].x += 2; s[i].y--; break;
                         }
                         s[i].szybkosc = 0;
-                        s[i].aktualizujTraiektorie();
+                        s[i].aktualizujTrajektorie();
                     }
                     else if ((22400 / s[i].v) <= s[i].szybkosc && s[i].d % 4 == 2)   // 560km/h - 1k/2s         (pion)
                     {
@@ -282,7 +293,7 @@ namespace Kontrola_Lotów
                             case 6:s[i].y--; break;
                         }
                         s[i].szybkosc = 0;
-                        s[i].aktualizujTraiektorie();
+                        s[i].aktualizujTrajektorie();
                     }
                     else if ((11200 / s[i].v) <= s[i].szybkosc && s[i].d % 4 == 0)    // 560km/h - 1k/1s         (poziom)
                     {
@@ -292,10 +303,10 @@ namespace Kontrola_Lotów
                             case 4:s[i].x--; break;
                         }
                         s[i].szybkosc = 0;
-                        s[i].aktualizujTraiektorie();
+                        s[i].aktualizujTrajektorie();
                     }
                     b.insert(11 + s[i].x, 18 + s[i].y, s[i].typ);
-                    if (s[i].traiektoria == 1) { s[i].pokaTraiektorie(); }
+                    if (s[i].trajektoria == 1) { s[i].pokaTrajektorie(); }
                 }
         }
         public void Kolizja()
@@ -327,6 +338,7 @@ namespace Kontrola_Lotów
             b.pokaInterfejs();
             int ms = 0 ;
             int lot = -1;
+            int time = 100;
             int[] x = new int[1];
             x[0] = 0;
             for(; ; )
@@ -336,6 +348,7 @@ namespace Kontrola_Lotów
                 b.pokaListeLotow(radar,x[0]);                       // wypisuje liste lotow do podgledu/edycji
                 b.insert(200,26,Convert.ToString(ms/10+" s"));      // wypisuje czas trwania programu
                 b.insert(212, 51, Convert.ToString("."));           // wypisuje nic na koncu okna
+                b.pokaLot(radar, lot);
                 
                 if (Console.KeyAvailable)                           // pobiera wybrany przycisk
                 {
@@ -345,8 +358,8 @@ namespace Kontrola_Lotów
                         switch(wybor)
                         {
                             case '0':b.czyscKonsole(); lot = -1; break;
-                            case '1': if (radar.s[lot].traiektoria < 1) radar.s[lot].traiektoria++; else radar.s[lot].traiektoria--; break;
-                            case '2': radar.s[lot].zmienTraiektorie(); break;
+                            case '1': if (radar.s[lot].trajektoria < 1) radar.s[lot].trajektoria++; else radar.s[lot].trajektoria--; break;
+                            case '2': radar.s[lot].zmienTrajektorie(); break;
                         }
                     }                                          // zarzadzanie lotem
                     else if (wybor-49 >= 0 && wybor-49 < 10 && wybor-49 <= radar.s.Count)
@@ -369,11 +382,18 @@ namespace Kontrola_Lotów
                     {
                         radar.run *= -1;
                     }   // wlaczy/wylacz radar
+                    else if (wybor == ']')
+                    {
+                        if(time>15)time -= 15;
+                    }   // przyspiesz czas
+                    else if (wybor == '[')
+                    {
+                        time += 15;
+                    }   // przyspiesz czas
                 }
-                b.pokaLot(radar, lot);
-                Thread.Sleep(100);
+                Thread.Sleep(time);
                 ms++;
-                if (losowySamolot.s != 0) b.pokaSamolot(ref losowySamolot); // ladujacy samolot
+                if (losowySamolot.v != 0) b.pokaSamolot(ref losowySamolot); // ladujacy samolot
             }
         }
     }
