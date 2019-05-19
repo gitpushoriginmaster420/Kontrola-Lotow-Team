@@ -82,7 +82,8 @@ namespace Kontrola_Lotów
                 insert(138, 34, "Predkosc: " + r.s[i].v + " kmph ("+(r.s[i].v*0.62)+" mph)");
                 insert(138, 35, "Kierunek: " + kierunek(r.s[i].d));
                 insert(138, 37, "[1] Wyswietl/Ukryj traiektorie");
-                insert(138, 38, "[0] Opusc okno Zarzadzania Lotem");
+                insert(138, 38, "[2] Zmien Wspolrzedne geograficzne");
+                insert(138, 39, "[0] Opusc okno Zarzadzania Lotem");
             }
         }
         public void pokaSamolot(ref Trasa pozycja)
@@ -179,6 +180,7 @@ namespace Kontrola_Lotów
             v = vv;
             szybkosc = 0;
             trajektoria = 0;
+            tr = new List<Trasa>();
             stanLotu = "";
         }
         public void ustalTrajektorie(int x_cel, int y_cel, int direct)
@@ -188,29 +190,70 @@ namespace Kontrola_Lotów
             double bok = v * v * 0.00000670162031;     // dlugosc boku osmiokata
             if (x_cel != x || y_cel != y)           // znajdz trase do podanego celu
             {
-                Statek s1 = new Statek(x,y,h,d,v);
-                s1.tr = new List<Trasa>();
-                s1.tr.Add(new Trasa(x, y, h, d, v));
-                for (int kk=0;kk<7;kk++)
+                Statek[] s = new Statek[4];    // tworzy trzon tr s[0], bok okregu s[1], prosta s[2], prostopadla s[3]
+
+                int git = 0;
+                double[] dl_bok = new double[8];
+                for(int jj=0;jj<8;jj++)             // dlugosci odpowiednich bokow
                 {
-                    double dl_bok = bok;
-                    if (s1.d % 4 == 0) dl_bok = Math.Round(dl_bok * 2);         // poziom
-                    else if (s1.d % 4 == 2) dl_bok = Math.Round(dl_bok * 1);    // pion
-                    else if (s1.d % 2 == 1) dl_bok = Math.Round(dl_bok * 0.71); // skos
-
-                    for (int ii=0;ii< dl_bok;ii++)
-                        plusTrajektorie(ref s1.tr,s1.d);
-
-                    s1.d = (s1.d+1)%8;
+                    if (d % 4 == 0) dl_bok[jj] = Math.Round(bok * 2);         // poziom
+                    else if (d % 4 == 2) dl_bok[jj] = Math.Round(bok * 1);    // pion
+                    else if (d % 2 == 1) dl_bok[jj] = Math.Round(bok * 0.71); // skos
                 }
-                tr.AddRange(s1.tr);
+                int xd = -1, x1, y1;
+
+                s[0] = new Statek(x,y,h,d,v);
+                s[0].d = d;
+                s[0].tr.Add(new Trasa(x, y, h, d, v));    // trzon trajektorii s[0]
+
+                int ile = 0;
+                while (ile<8 && git<1)
+                {
+                    int dd = s[0].d;    // ostatni kierunek na trzonie s[0]
+
+                    s[1] = new Statek(x, y, h, d, v);
+                    s[1].tr.Add(new Trasa(x, y, h, dd, v));             // bok okregu s[1]
+
+                    for (int ii = 0; ii < dl_bok[d] - 1; ii++)          // dodaje do trajektorii bok
+                        plusTrajektorie(ref s[1].tr, s[1].d);
+
+                    x1 = s[1].tr[s[1].tr.Count - 1].x;                  // ostatni x s[1]
+                    y1 = s[1].tr[s[1].tr.Count - 1].y;                  // ostatni y s[1]
+
+                    s[2] = new Statek(x1, y1, h, d, v);
+                    s[2].tr.Add(new Trasa(x1, y1, h, dd, v));           // tworzy prosta s[2]
+                    int i2 = 0,i3 = 0;
+                    while (s[2].tr[i2].x < 96 && s[2].tr[i2].y < 32 && s[2].tr[i2].x > 0 && s[2].tr[i2].y > 0)  // tworzy trajektorie s3
+                    {
+                        plusTrajektorie(ref s[2].tr, s[2].tr[i2].d);     // buduje prosta s[2]
+                        i2 = s[2].tr.Count - 1;
+                        i3 = 0;
+                        s[3] = new Statek(s[2].tr[i2].x, s[2].tr[i2].y, h, d, v);
+                        s[3].tr.Add(new Trasa(s[2].x, s[2].y, h, dd, v));     // tworzy prosta s[3]
+                        while (s[3].tr[i3].x < 96 && s[3].tr[i3].y < 32 && s[3].tr[i3].x > 0 && s[3].tr[i3].y > 0)
+                        {
+                            plusTrajektorie(ref s[3].tr, s[3].tr[i3].d);     // buduje prosta s[3]
+                            i3 = s[3].tr.Count - 1;
+                            if (s[3].tr[i3].x == x_cel && s[3].tr[i3].y == y_cel)
+                            {
+                                git = 1;
+                            }
+                            if (git == 1) break;
+                        }
+                        if (git == 1) break;
+                    }
+                    if (git == 0) s[0].d = (s[1].d + xd + 8) % 8;
+                    s[0].tr.AddRange(s[1].tr);
+                }
+
+                if (git == 1) tr.AddRange(s[0].tr);   // dodanie tajektorii s[0] do trajektorii samolotu
             }
 
-            int i = tr.Count-1;
+            int i = tr.Count - 1;
             while (tr[i].x < 96 && tr[i].y < 32 && tr[i].x > 0 && tr[i].y > 0)  // kontynuluj lot prosto
             {
-                i = tr.Count - 1;
                 plusTrajektorie(ref tr,tr[i].d);    // dodaje nastepna kratke
+                i = tr.Count - 1;
             }
         }
         public void pokaTrajektorie()
@@ -218,29 +261,33 @@ namespace Kontrola_Lotów
             Baza b =new Baza();
             for(int i=1;i<tr.Count;i++)
             {
-                if (tr[i].d % 4 == 0 && tr[i].x % 2 == 1) b.insert(11 + tr[i].x, 18 + tr[i].y, " ");
-                else b.insert(11 + tr[i].x, 18 + tr[i].y, Convert.ToString(tr[i].d));
+                if(tr[i].x > 0 && tr[i].y>0 && tr[i].x<97 && tr[i].y<33)
+                {
+                    if (tr[i].d % 4 == 0 && tr[i].x % 2 == 0) b.insert(11 + tr[i].x, 18 + tr[i].y, " ");
+                    else b.insert(11 + tr[i].x, 18 + tr[i].y, "^");
+                }
             }
         }
         public void aktualizujTrajektorie()
         {
-            tr.RemoveAt(1);
+            tr.RemoveAt(0);
         }
         public void zmienTrajektorie()
         {
             Baza b = new Baza();
-            b.insert(138, 40, "Podaj nowe wspolrzedne: S 21.");
+            b.insert(138, 41, "Podaj nowe wspolrzedne: S 21.");
             int y = Convert.ToInt32(Console.ReadLine());
-            b.insert(169, 40, ", E 4.");
-            int x = Convert.ToInt32(Console.ReadLine());
+            b.insert(169, 41, ", E 4.");
+            int x = Convert.ToInt32(Console.ReadLine())*2;
             ustalTrajektorie(x, y, d);
             b.insert(138, 40, "                                         ");
         }
         public void plusTrajektorie(ref List<Trasa> tr,int dd)
         {
             int i = tr.Count-1;
-            int xx = tr[i].x, yy = tr[i].y, hh = tr[i].h, vv = tr[i].v;
-            switch (dd)
+            int xx = tr[i].x, yy = tr[i].y, hh = tr[i].h, vv = tr[i].v, d=dd;
+            if (tr[i].d != dd) d = (d+7)%8;
+            switch (d)
             {
                 case 0: xx++; break;
                 case 1: xx += 2; yy++; break;
@@ -277,10 +324,10 @@ namespace Kontrola_Lotów
                     {
                         switch (s[i].d)
                         {
-                            case 1:s[i].x += 2; s[i].y++; break;
-                            case 3:s[i].x -= 2; s[i].y++; break;
-                            case 5:s[i].x -= 2; s[i].y--; break;
-                            case 7:s[i].x += 2; s[i].y--; break;
+                            case 1:s[i].x = s[i].x + 2; s[i].y++; break;
+                            case 3:s[i].x = s[i].x - 2; s[i].y++; break;
+                            case 5:s[i].x = s[i].x - 2; s[i].y--; break;
+                            case 7:s[i].x = s[i].x + 2; s[i].y--; break;
                         }
                         s[i].szybkosc = 0;
                         s[i].aktualizujTrajektorie();
@@ -305,8 +352,10 @@ namespace Kontrola_Lotów
                         s[i].szybkosc = 0;
                         s[i].aktualizujTrajektorie();
                     }
-                    b.insert(11 + s[i].x, 18 + s[i].y, s[i].typ);
                     if (s[i].trajektoria == 1) { s[i].pokaTrajektorie(); }
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    b.insert(11 + s[i].x, 18 + s[i].y, s[i].typ);
+                    Console.ResetColor();
                 }
         }
         public void Kolizja()
