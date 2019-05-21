@@ -396,6 +396,10 @@ namespace Kontrola_Lotów
                 case 4: typ = "Sz"; break;
             }
         }
+        public void NiebezpieczneZblizenia()
+        {
+
+        }
     }
     class Program
     {
