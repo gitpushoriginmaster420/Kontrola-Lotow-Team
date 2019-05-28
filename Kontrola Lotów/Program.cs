@@ -184,7 +184,7 @@ namespace Kontrola_Lotów
             v = int.Parse(dane[5]);
             szybkosc = 0;
             trajektoria = 0;
-            ustalTrajektorie(x, y, d);
+            ustalTrajektorie(x, y, d, 1);
             stanLotu = "Spoko";
         }
         public Statek(int xx, int yy, int hh, int dd, int vv)
@@ -200,11 +200,11 @@ namespace Kontrola_Lotów
             tr = new List<Trasa>();
             stanLotu = "";
         }
-        public void ustalTrajektorie(int x_cel, int y_cel, int direct)
+        public void ustalTrajektorie(int x_cel, int y_cel, int direct,int skala)
         {
             tr = new List<Trasa>();
             //plusTrajektorie(ref tr, d);
-            double bok = v * v * 0.00000670162031;     // dlugosc boku osmiokata
+            double bok = v * v * 0.00000670162031 * skala;     // dlugosc boku osmiokata
             if (x_cel != x || y_cel != y)           // znajdz trase do podanego celu
             {
                 Statek[] s = new Statek[4];    // tworzy trzon tr s[0], bok okregu s[1], prosta s[2], prostopadla s[3]
@@ -224,7 +224,7 @@ namespace Kontrola_Lotów
                 s[0].tr.Add(new Trasa(x, y, h, d, v));    // trzon trajektorii s[0]
 
                 int ile = 0;
-                while (ile < 8 && git < 1)
+                while (ile < 8 && git < 1)   // szuka mozliwosci poki co w lewo
                 {
                     int dd = s[0].d;    // ostatni kierunek na trzonie s[0]
                     x0 = s[0].tr[s[0].tr.Count - 1].x;
@@ -273,6 +273,7 @@ namespace Kontrola_Lotów
                 }
 
                 if (git == 1) tr.AddRange(s[0].tr);   // dodanie tajektorii s[0] do trajektorii samolotu
+                else tr.Add(new Trasa(x, y, h, d, v));
             }
             else tr.Add(new Trasa(x, y, h, d, v));
             int i = tr.Count - 1;
@@ -301,14 +302,14 @@ namespace Kontrola_Lotów
         {
             tr.RemoveAt(0);
         }
-        public void zmienTrajektorie()
+        public void zmienTrajektorie(int skala)
         {
             Baza b = new Baza();
             b.insert(138, 41, "Podaj nowe wspolrzedne: E 21°");
             int x = Convert.ToInt32(Console.ReadLine()) * 2;
             b.insert(169, 41, ", S 4°");
             int y = Convert.ToInt32(Console.ReadLine());
-            ustalTrajektorie(x, y, d);
+            ustalTrajektorie(x, y, d, skala);
             b.insert(138, 40, "                                         ");
         }
         public void plusTrajektorie(ref List<Trasa> tr, int dd)
@@ -342,8 +343,7 @@ namespace Kontrola_Lotów
     {
         public List<Statek> s;
         string[] mapa;
-        public int run;
-        int skala;
+        public int run, skala;
         public Radar()
         {
             s = new List<Statek>();
@@ -527,7 +527,7 @@ namespace Kontrola_Lotów
                     {
                         case '0': b.czyscKonsole(); lot = -1; break;
                         case '1': if (radar.s[lot].trajektoria < 1) radar.s[lot].trajektoria++; else radar.s[lot].trajektoria--; break;
-                        case '2': radar.s[lot].zmienTrajektorie(); break;
+                        case '2': radar.s[lot].zmienTrajektorie(radar.skala); break;
                     }                                        // zarzadzanie lotem
                     else if (wybor - 49 >= 0 && wybor - 49 < 10 && wybor - 49 <= radar.s.Count)
                     {
