@@ -255,7 +255,11 @@ namespace Kontrola_Lotów
                             //b.insert(11+s[3].tr[i3].x, 18+s[3].tr[i3].y, "e");
                             //Thread.Sleep(10);
                             i3 = s[3].tr.Count - 1;
+<<<<<<< HEAD
+                            if ((s[3].tr[i3].x == x_cel && s[3].tr[i3].y == y_cel))
+=======
                             if (s[3].tr[i3].x == x_cel && s[3].tr[i3].y == y_cel)
+>>>>>>> 73553bea50aa1a4a6d82406585ad35fe8c57f420
                             {
                                 git = 1;
                                 s[2].tr.RemoveAt(s[2].tr.Count - 1);
@@ -487,8 +491,8 @@ namespace Kontrola_Lotów
             r = rand.Next(1, 4);
             switch (r)
             {
-                case 1: typ = "S"; break;
-                case 2: typ = "H"; break;
+                case 1: typ = "S"; break;     // no samoloty fajne sa generalnie
+                case 2: typ = "H"; break;     // helikoptery tez sa spoko
                 case 3: typ = "B"; break;
                 case 4: typ = "Sz"; break;
             }

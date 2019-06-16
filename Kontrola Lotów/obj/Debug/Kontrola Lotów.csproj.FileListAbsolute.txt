@@ -13,6 +13,15 @@ C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow\Kontrola Lotów\obj\Debu
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow\Kontrola Lotów\obj\Debug\Kontrola Lotów.csproj.CoreCompileInputs.cache
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow\Kontrola Lotów\obj\Debug\Kontrola Lotów.exe
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow\Kontrola Lotów\obj\Debug\Kontrola Lotów.pdb
+<<<<<<< HEAD
+C:\Users\Piotr\Documents\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\bin\Debug\Kontrola Lotów.exe.config
+C:\Users\Piotr\Documents\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\bin\Debug\Kontrola Lotów.exe
+C:\Users\Piotr\Documents\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\bin\Debug\Kontrola Lotów.pdb
+C:\Users\Piotr\Documents\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\obj\Debug\Kontrola Lotów.csprojAssemblyReference.cache
+C:\Users\Piotr\Documents\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\obj\Debug\Kontrola Lotów.csproj.CoreCompileInputs.cache
+C:\Users\Piotr\Documents\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\obj\Debug\Kontrola Lotów.exe
+C:\Users\Piotr\Documents\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\obj\Debug\Kontrola Lotów.pdb
+=======
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\bin\Debug\Kontrola Lotów.exe.config
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\bin\Debug\Kontrola Lotów.exe
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\bin\Debug\Kontrola Lotów.pdb
@@ -20,3 +29,4 @@ C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\obj
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\obj\Debug\Kontrola Lotów.csproj.CoreCompileInputs.cache
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\obj\Debug\Kontrola Lotów.exe
 C:\Users\olgie\OneDrive\Dokumenty\GitHub\Kontrola-Lotow-Team\Kontrola Lotów\obj\Debug\Kontrola Lotów.pdb
+>>>>>>> 73553bea50aa1a4a6d82406585ad35fe8c57f420
