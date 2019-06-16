@@ -343,6 +343,10 @@ namespace Kontrola_Lotów
                 return -1;
         }
     }
+    class Budynek
+    {
+        public int x, y, h;
+    }
     class Radar
     {
         public List<Statek> s;
