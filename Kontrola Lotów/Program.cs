@@ -238,7 +238,7 @@ namespace Kontrola_Lotów
                             //b.insert(11+s[3].tr[i3].x, 18+s[3].tr[i3].y, "e");
                             //Thread.Sleep(10);
                             i3 = s[3].tr.Count - 1;
-                            if ((s[3].tr[i3].x == x_cel && s[3].tr[i3].y == y_cel) || (s[3].tr[i3].x + 1 == x_cel && s[3].tr[i3].y + 1 == y_cel))
+                            if ((s[3].tr[i3].x == x_cel && s[3].tr[i3].y == y_cel))
                             {
                                 git = 1;
                                 s[2].tr.RemoveAt(s[2].tr.Count - 1);
