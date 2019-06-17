@@ -69,15 +69,16 @@ namespace Kontrola_Lotów
         }
         public void pokaListeLotow(Radar r, int czy)
         {
-            if (czy > -1)
-                Console.ForegroundColor = ConsoleColor.DarkGray;
             for (int i = 0; i < 9; i++)
             {
-                insert(119, 32 + 2 * i, "xd               ");
+                insert(119, 32 + 2 * i, ".                ");
             }
             for (int i = 0; i < r.s.Count; i++)
             {
+                if (czy > -1)
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
                 insert(119, 32 + i * 2, "[" + Convert.ToString(i + 1) + "] " + r.s[i].typ + " - ");
+
                 if (r.s[i].stanLotu != "Spoko") Console.ForegroundColor = ConsoleColor.Red;
                 insert(129, 32 + i * 2, r.s[i].stanLotu);
                 Console.ResetColor();
@@ -485,8 +486,6 @@ namespace Kontrola_Lotów
                     }
                     if (s[i].trajektoria == 1) { s[i].pokaTrajektorie(); }
 
-                    if (s[i].szybkosc > 0) ;
-
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     if (s[i].x > 0 && s[i].x <= 96 && s[i].y > 0 && s[i].y <= 32) baz.insert(11 + s[i].x, 18 + s[i].y, s[i].typ);
                     Console.ResetColor();
@@ -539,10 +538,12 @@ namespace Kontrola_Lotów
         }
         public int Kolizja()
         {
-            for (int i = 0; i < s.Count; i++)
+            Baza bax = new Baza();
+            for (int i = 0; i < s.Count; i++)   // kolejne statki
             {
-                for (int j = i + 1; j < s.Count; j++)
+                for (int j = i + 1; j < s.Count; j++)   // z kazdymi statkami
                 {
+                    int git = 0;
                     if (s[i].h == s[j].h)     // sprawdzenie wysokosci
                     {
                         for (int a = 0; a < s[i].tr.Count; a++)
@@ -551,11 +552,12 @@ namespace Kontrola_Lotów
                             {
                                 if (s[i].tr[a].x == s[j].tr[b].x && s[i].tr[a].y == s[j].tr[b].y)
                                 {
-                                    if (Odleglosc(i, a) / s[i].v == Odleglosc(j, b) / s[j].v)
+                                    if (Odleglosc(i, a) / s[i].v / 3.6 - Odleglosc(j, b) / s[j].v / 3.6 < 0.2 &&
+                                        Odleglosc(i, a) / s[i].v / 3.6 - Odleglosc(j, b) / s[j].v / 3.6 > -0.2)
                                     {
                                         s[i].stanLotu = "Koliz";
                                         s[j].stanLotu = "Koliz";
-                                        return 0;
+                                        git++;break;
                                     }
                                     else
                                     {
@@ -564,9 +566,11 @@ namespace Kontrola_Lotów
                                     }
                                 }
                             }
+                            if (git > 0) break;
                         }
                     }
                 }
+                if (skala > 1) KolizjaBudynek(s[i]);
             }
             return 0;
         }
@@ -576,7 +580,7 @@ namespace Kontrola_Lotów
             if (s.Count == 9) return 0;
 
             Random rand = new Random();
-            int r, eloy, bencx, w = 0, k = 0, p = 0, czy;
+            int eloy, bencx, w = 0, k = 0, p = 0, czy;
             string typ = "";
             eloy = rand.Next(-12, 44);
             bencx = rand.Next(-24, 120);
@@ -599,8 +603,8 @@ namespace Kontrola_Lotów
                     case 20:     // 150 300
                         {
                             los = rand.Next(1, 3);
-                            if (los == 1) { p = rand.Next(20, 40); w = rand.Next(5, 10) * 100; typ = "B"; }
-                            if (los == 2) { p = rand.Next(90, 120); w = rand.Next(5, 10) * 100; typ = "Z"; }
+                            if (los == 1) { p = rand.Next(20, 40); w = rand.Next(2, 6) * 100; typ = "B"; }
+                            if (los == 2) { p = rand.Next(90, 120); w = rand.Next(4, 8) * 100; typ = "Z"; }
                             if (los == 3) { p = rand.Next(100, 200); w = rand.Next(5, 10) * 100; typ = "H"; }
                         }
                         break;
@@ -665,11 +669,11 @@ namespace Kontrola_Lotów
         }
         public int NiebezpieczneZblizenia()
         {
-            Baza bax = new Baza();
             for (int i = 0; i < s.Count; i++)
             {
                 for (int j = i + 1; j < s.Count; j++)
                 {
+                    int git = 0;
                     if (s[i].h - s[j].h < 100 && s[i].h - s[j].h > -100)     // sprawdzenie wysokosci
                     {
                         for (int a = 0; a < s[i].tr.Count; a++)
@@ -678,22 +682,58 @@ namespace Kontrola_Lotów
                             {
                                 if (s[i].tr[a].x == s[j].tr[b].x && s[i].tr[a].y == s[j].tr[b].y)
                                 {
-                                    if (Odleglosc(i, a) / s[i].v / 3.6 - Odleglosc(j, b) / s[j].v / 3.6 < 420
-                                        && Odleglosc(i, a) / s[i].v / 3.6 - Odleglosc(j, b) / s[j].v / 3.6 > -420)
+                                    if (Odleglosc(i, a) / s[i].v / 3.6 - Odleglosc(j, b) / s[j].v / 3.6 < 2
+                                        && Odleglosc(i, a) / s[i].v / 3.6 - Odleglosc(j, b) / s[j].v / 3.6 > -2)
                                     {
-                                        bax.insert(30, 10, "KOLIZJA KURWA!         ");
                                         s[i].stanLotu = "Zbliz";
                                         s[j].stanLotu = "Zbliz";
-                                        return 0;
+                                        git++;break;
                                     }
                                     else
                                     {
-                                        bax.insert(30, 10, "NIE MA KOLIZJI KURWA!");
                                         s[i].stanLotu = "Spoko";
                                         s[j].stanLotu = "Spoko";
                                     }
                                 }
                             }
+                            if (git > 0) break;
+                        }
+                    }
+                }
+                if (skala > 1) NiebezpieczneZblizenieBudynek(s[i]);
+            }
+            return 0;
+        }
+        public int KolizjaBudynek(Statek s)
+        {
+            for (int j = 0; j < b.Count; j++)
+            {
+                if (s.h <= b[j].h)
+                {
+                    for (int a = 0; a < s.tr.Count; a++)
+                    {
+                        if (s.tr[a].x == b[j].x && s.tr[a].y == b[j].y)
+                        {
+                            s.stanLotu = "Koliz";
+                            return 0;
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+        public int NiebezpieczneZblizenieBudynek(Statek s)
+        {
+            for (int j = 0; j < b.Count; j++)
+            {
+                if (s.h <= b[j].h)
+                {
+                    for (int a = 0; a < s.tr.Count; a++)
+                    {
+                        if (s.tr[a].x - b[j].x < 2 && s.tr[a].x - b[j].x > -2 && s.tr[a].y - b[j].y < 2 && s.tr[a].y - b[j].y > -2)
+                        {
+                            s.stanLotu = "Zbliz";
+                            return 0;
                         }
                     }
                 }
@@ -713,10 +753,40 @@ namespace Kontrola_Lotów
         }
         public void trajektorki()
         {
+            Random Rand = new Random();
+            int x = Rand.Next(0, 2);
             for (int i = 0; i < s.Count; i++)
             {
-                s[i].trajektoria = 1;
+                s[i].trajektoria = x;
             }
+        }
+        public int umieranie()
+        {
+            for(int i=0;i<s.Count;i++)
+            {
+                for(int j=i+1;j<s.Count;j++)
+                {
+                    if ((s[i].x == s[j].x && s[i].y == s[j].y) || (s[i].x - 1 == s[j].x && s[i].y == s[j].y) || (s[i].x == s[j].x && s[i].y-1 == s[j].y))
+                    {
+                        s.Remove(s[j]);
+                        s.Remove(s[i]);
+                        return 0;
+                    }
+                }
+            }
+            for (int i = 0; i < s.Count; i++)
+            {
+                for (int j = i + 1; j < b.Count; j++)
+                {
+                    if (b[j].x == s[i].x && b[j].y == s[i].y && b[j].h >= s[i].h)
+                    {
+                        s.Remove(s[i]);
+                        b.Remove(b[j]);
+                        return 0;
+                    }
+                }
+            }
+            return 0;
         }
     }
     class Program
@@ -745,6 +815,7 @@ namespace Kontrola_Lotów
                     b.pokaListeLotow(radar, lot);                       // wypisuje liste lotow do podgledu/edycji
                     if (radar.skala > 1) radar.naniesBudynki();         // nanosi budynki na mape
                 }
+                radar.umieranie();
                 if (gener == 1) radar.Losowanko();                      // generuje samoloty na mapie przez losowanie
                 if (lot >= 0) b.pokaLot(radar, lot);                    // wyswietla informacje o locie
                 else b.pokaKonsole(radar.skala, gener);                  // czysci konsole
