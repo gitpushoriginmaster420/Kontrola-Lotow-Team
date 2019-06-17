@@ -1,0 +1,12 @@
+Projekt zrealizowany we spolpracy z najlepszymi progamistami tego wymiaru.
+
+Glowni wykonawcy:
+
+Olgierd Kuczynski
+Jakub Kozloski
+Piotr Tomczyk
+
+Zleceniodawca: Anna Lupicka
+
+Programowanie Obiektowe 2019
+GIT PUSH ORIGIN MASTER COOP.
