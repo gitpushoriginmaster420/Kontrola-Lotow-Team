@@ -22,9 +22,15 @@ namespace Kontrola_Lotów
                 r.b.Add(new Budynek(ObiektNaMapie[i].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)));
         }
         public Baza() { }
-        public void save()              // zapisuje stan radaru do pliku
+        public void zapis(Radar r)              // zapisuje stan radaru do pliku
         {
-            // zapisywanie mapy
+            int xd = r.s.Count;
+            System.IO.StreamWriter sw = new System.IO.StreamWriter("radar.txt");
+            for (int i = 0; i < xd; i++)
+            {
+                sw.WriteLine(r.Tostring(i));
+            }   // zapisywanie mapy
+            sw.Close();
         }
         public void insert(int x, int y, string s)
         {
@@ -65,11 +71,17 @@ namespace Kontrola_Lotów
         {
             if (czy > -1)
                 Console.ForegroundColor = ConsoleColor.DarkGray;
+            for (int i = 0; i < 9; i++)
+            {
+                insert(119, 32 + 2 * i, "xd               ");
+            }
             for (int i = 0; i < r.s.Count; i++)
             {
-                insert(119, 32 + i * 2, "[" + Convert.ToString(i + 1) + "] " + r.s[i].typ + " - " + r.s[i].stanLotu);
+                insert(119, 32 + i * 2, "[" + Convert.ToString(i + 1) + "] " + r.s[i].typ + " - ");
+                if (r.s[i].stanLotu != "Spoko") Console.ForegroundColor = ConsoleColor.Red;
+                insert(129, 32 + i * 2, r.s[i].stanLotu);
+                Console.ResetColor();
             }
-            insert(119, 32 + r.s.Count * 2, "                 ");
             Console.ResetColor();
         }
         public void pokaListeBudynkow(Radar r)
@@ -77,13 +89,13 @@ namespace Kontrola_Lotów
             Baza b = new Baza();
             Console.ForegroundColor = ConsoleColor.DarkGray;
             b.pokaKonsole(r.skala, 0);
-            if(r.run>0)b.pokaListeLotow(r, 1);
+            if (r.run > 0) b.pokaListeLotow(r, 1);
             Console.ResetColor();
 
-            for (int i = 0; i < r.b.Count/2; i++)
-                insert(138, 40 + i, Convert.ToString(r.b[i].h)+"m - "+r.b[i].nazwa);
+            for (int i = 0; i < r.b.Count / 2; i++)
+                insert(138, 40 + i, Convert.ToString(r.b[i].h) + "m - " + r.b[i].nazwa);
 
-            for (int i = r.b.Count/2; i < r.b.Count; i++)
+            for (int i = r.b.Count / 2; i < r.b.Count; i++)
                 insert(170, 34 + i, Convert.ToString(r.b[i].h) + "m - " + r.b[i].nazwa);
 
             char wyb = Console.ReadKey().KeyChar;
@@ -115,17 +127,17 @@ namespace Kontrola_Lotów
                 insert(138, 39, "[0] Opusc okno Zarzadzania Lotem");
             }
         }
-        public void pokaKonsole(int skala,int gen)
+        public void pokaKonsole(int skala, int gen)
         {
             string onoff = "OFF";
             if (gen > 0) onoff = "ON ";
             insert(138, 29, "* Zarzadzanie Systemem *");
             insert(138, 30, "----------------------------------------------------------------------");
             insert(138, 32, "[M] Wczytaj inna mape                      [<] Spowolnij czas");
-            insert(138, 34, "[G] Generowanie lotow: "+onoff);insert(181,34,"[>] Przyspiesz czas");
-            insert(138, 36, "[W] Pusc animacje ladujacego samolotu      [/] Ustaw domyslny czas");
-            insert(138, 38, "[X] Niespodziewana sytuacja");
-            if (skala == 20) insert(181,38,"[B] Wyswietl liste budynkow");
+            insert(138, 34, "[G] Generowanie lotow: " + onoff); insert(181, 34, "[>] Przyspiesz czas");
+            insert(138, 36, "[S] Zapisuje aktualny stan radaru          [/] Ustaw domyslny czas");
+            insert(138, 38, "[N] Sprawdz N.Zblizenia / [K] Kolizje");
+            if (skala == 20) insert(181, 38, "[B] Wyswietl liste budynkow");
         }
         public void pokaSamolot(ref Trasa pozycja)
         {
@@ -181,7 +193,7 @@ namespace Kontrola_Lotów
         public void pokaFax()
         {
             insert(70, 8, ".-----------------------------------------------------------------------------.");
-            for (int i=0;i<fax.Length;i++)
+            for (int i = 0; i < fax.Length; i++)
             {
                 insert(70, 9 + i, "|                                                                             |");
                 insert(73, 9 + i, fax[i]);
@@ -221,11 +233,11 @@ namespace Kontrola_Lotów
         public int x, y, h, d, v;   // [x,y,h]- wspolrzedne, d- kierunek, v- predkosc
         public int szybkosc;
         public int trajektoria;
-        List<Trasa> tr;             // traiektoria
+        public List<Trasa> tr;             // traiektoria
         public Statek(string[] dane)
         {
             typ = dane[0];
-            x = int.Parse(dane[1]) * 2;
+            x = int.Parse(dane[1]);
             y = int.Parse(dane[2]);
             h = int.Parse(dane[3]);
             d = int.Parse(dane[4]);
@@ -261,7 +273,7 @@ namespace Kontrola_Lotów
             tr = new List<Trasa>();
             stanLotu = "";
         }
-        public void ustalTrajektorie(int x_cel, int y_cel, int direct,int skala)
+        public void ustalTrajektorie(int x_cel, int y_cel, int direct, int skala)
         {
             tr = new List<Trasa>();
             //plusTrajektorie(ref tr, d);
@@ -502,8 +514,8 @@ namespace Kontrola_Lotów
         {
             Baza baz = new Baza();
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            baz.pokaKonsole(skala,0);
-            if(czy>0) baz.pokaListeLotow(this,1);
+            baz.pokaKonsole(skala, 0);
+            if (czy > 0) baz.pokaListeLotow(this, 1);
             Console.ResetColor();
             baz.insert(139, 42, "Wybierz mape, ktora chcesz wczytac:");
             baz.insert(141, 44, "[1] Mapa SanAndreas (48 x 32 km)");
@@ -519,13 +531,13 @@ namespace Kontrola_Lotów
         {
             Baza baz = new Baza();
             Console.ForegroundColor = ConsoleColor.Red;
-            for(int i=0;i<b.Count;i++)
+            for (int i = 0; i < b.Count; i++)
             {
-                baz.insert(11+b[i].x, 18+b[i].y, "[]");
+                baz.insert(11 + b[i].x, 18 + b[i].y, "[]");
             }
             Console.ResetColor();
         }
-        public void Kolizja()
+        public int Kolizja()
         {
             for (int i = 0; i < s.Count; i++)
             {
@@ -533,45 +545,65 @@ namespace Kontrola_Lotów
                 {
                     if (s[i].h == s[j].h)     // sprawdzenie wysokosci
                     {
-                        ;
+                        for (int a = 0; a < s[i].tr.Count; a++)
+                        {
+                            for (int b = 0; b < s[j].tr.Count; b++)
+                            {
+                                if (s[i].tr[a].x == s[j].tr[b].x && s[i].tr[a].y == s[j].tr[b].y)
+                                {
+                                    if (Odleglosc(i, a) / s[i].v == Odleglosc(j, b) / s[j].v)
+                                    {
+                                        s[i].stanLotu = "Koliz";
+                                        s[j].stanLotu = "Koliz";
+                                        return 0;
+                                    }
+                                    else
+                                    {
+                                        s[i].stanLotu = "Spoko";
+                                        s[j].stanLotu = "Spoko";
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
+            return 0;
         }
         public int Losowanko()
         {
             Baza b = new Baza();
-            if (s.Count == 9) return 0; 
+            if (s.Count == 9) return 0;
 
             Random rand = new Random();
             int r, eloy, bencx, w = 0, k = 0, p = 0, czy;
             string typ = "";
             eloy = rand.Next(-12, 44);
-            //bencx = rand.Next(-24, 120);
-            bencx = rand.Next(1, 95);
+            bencx = rand.Next(-24, 120);
+            //bencx = rand.Next(1, 95);
             czy = rand.Next(0, 30);
 
             if ((eloy > 32 || eloy < 0 || bencx > 96 || bencx < 0) && czy == 13)
             {
                 int los;
-                switch(skala)
+                switch (skala)
                 {
                     case 1:     // y = -12 44 x = -24 120  x 0 96 y 0 32 , 770 830
-                    {
-                        los = rand.Next(1,3);
-                            if (los == 1) { p = rand.Next(770, 830); w = rand.Next(8000, 12000); typ = "S"; }
-                            if (los == 2) { p = rand.Next(250, 350); w = rand.Next(1000, 2000); typ = "Z"; }
-                            if (los == 3) { p = rand.Next(150, 300); w = rand.Next(500, 5000); typ = "H"; }
-                    }
-                    break;
+                        {
+                            los = rand.Next(1, 3);
+                            if (los == 1) { p = rand.Next(770, 830); w = rand.Next(10, 12) * 1000; typ = "S"; }
+                            if (los == 2) { p = rand.Next(250, 350); w = rand.Next(3, 4) * 1000; typ = "Z"; }
+                            if (los == 3) { p = rand.Next(150, 300); w = rand.Next(2, 4) * 1000; typ = "H"; }
+                        }
+                        break;
                     case 20:     // 150 300
-                    {
-                        los = rand.Next(1, 3);
-                        if (los == 1) { p = rand.Next(20, 40); w = rand.Next(100, 800); typ = "B"; }
-                        if (los == 2) { p = rand.Next(90, 120); w = rand.Next(1000, 2000); typ = "Z"; }
-                        if (los == 3) { p = rand.Next(100, 200); w = rand.Next(500, 5000); typ = "H"; }
-                    }
-                    break;
+                        {
+                            los = rand.Next(1, 3);
+                            if (los == 1) { p = rand.Next(20, 40); w = rand.Next(5, 10) * 100; typ = "B"; }
+                            if (los == 2) { p = rand.Next(90, 120); w = rand.Next(5, 10) * 100; typ = "Z"; }
+                            if (los == 3) { p = rand.Next(100, 200); w = rand.Next(5, 10) * 100; typ = "H"; }
+                        }
+                        break;
                 }
                 los = rand.Next(100, 999);
                 typ = typ + Convert.ToString(los);
@@ -588,7 +620,7 @@ namespace Kontrola_Lotów
                 else if (eloy < 0)     // statek zrespil sie na gornej polowie mapy
                 {
                     if (bencx < 0) k = 1;
-                    else if (bencx >= 0 && bencx < 18) k =rand.Next(1, 2);
+                    else if (bencx >= 0 && bencx < 18) k = rand.Next(1, 2);
                     else if (bencx >= 18 && bencx <= 78) k = rand.Next(1, 3);
                     else if (bencx > 78 && bencx <= 96) k = rand.Next(2, 3);
                     else if (bencx > 96) k = 3;
@@ -601,7 +633,7 @@ namespace Kontrola_Lotów
                 }
                 else if (bencx > 32)     // statek zrespil sie po prawej stronie mapy
                 {
-                    if (eloy >= 0 && eloy < 8) k =  rand.Next(6, 7);
+                    if (eloy >= 0 && eloy < 8) k = rand.Next(6, 7);
                     else if (eloy >= 8 && eloy <= 24) k = rand.Next(5, 7);
                     else if (eloy > 24 && eloy <= 32) k = rand.Next(5, 6);
                 }
@@ -609,9 +641,82 @@ namespace Kontrola_Lotów
             }
             return 0;
         }
-        public void NiebezpieczneZblizenia()
+        public double Odleglosc(int x, int y)
         {
-
+            double odleglosc = 0;
+            {
+                for (int i = 0; i < y; i++)
+                {
+                    if (s[x].tr[i].d % 2 == 1)
+                    {
+                        odleglosc += 1.414;
+                    }
+                    else if (s[x].tr[i].d % 4 == 2)
+                    {
+                        odleglosc += 1000;
+                    }
+                    else if (s[x].tr[i].d % 4 == 0)
+                    {
+                        odleglosc += 500;
+                    }
+                }
+            }
+            return odleglosc;
+        }
+        public int NiebezpieczneZblizenia()
+        {
+            Baza bax = new Baza();
+            for (int i = 0; i < s.Count; i++)
+            {
+                for (int j = i + 1; j < s.Count; j++)
+                {
+                    if (s[i].h - s[j].h < 100 && s[i].h - s[j].h > -100)     // sprawdzenie wysokosci
+                    {
+                        for (int a = 0; a < s[i].tr.Count; a++)
+                        {
+                            for (int b = 0; b < s[j].tr.Count; b++)
+                            {
+                                if (s[i].tr[a].x == s[j].tr[b].x && s[i].tr[a].y == s[j].tr[b].y)
+                                {
+                                    if (Odleglosc(i, a) / s[i].v / 3.6 - Odleglosc(j, b) / s[j].v / 3.6 < 420
+                                        && Odleglosc(i, a) / s[i].v / 3.6 - Odleglosc(j, b) / s[j].v / 3.6 > -420)
+                                    {
+                                        bax.insert(30, 10, "KOLIZJA KURWA!         ");
+                                        s[i].stanLotu = "Zbliz";
+                                        s[j].stanLotu = "Zbliz";
+                                        return 0;
+                                    }
+                                    else
+                                    {
+                                        bax.insert(30, 10, "NIE MA KOLIZJI KURWA!");
+                                        s[i].stanLotu = "Spoko";
+                                        s[j].stanLotu = "Spoko";
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+        public string Tostring(int i)
+        {
+            return s[i].typ.ToString() + " " + s[i].x.ToString() + " " + s[i].y.ToString() + " " + s[i].h.ToString() + " " + s[i].d.ToString() + " " + s[i].v.ToString();
+        }
+        public void zderzonko()
+        {
+            for (int i = 0; i < s.Count; i++)
+            {
+                s[i].ustalTrajektorie(48, 16, 0, skala);
+            }
+        }
+        public void trajektorki()
+        {
+            for (int i = 0; i < s.Count; i++)
+            {
+                s[i].trajektoria = 1;
+            }
         }
     }
     class Program
@@ -642,7 +747,7 @@ namespace Kontrola_Lotów
                 }
                 if (gener == 1) radar.Losowanko();                      // generuje samoloty na mapie przez losowanie
                 if (lot >= 0) b.pokaLot(radar, lot);                    // wyswietla informacje o locie
-                else b.pokaKonsole(radar.skala,gener);                  // czysci konsole
+                else b.pokaKonsole(radar.skala, gener);                  // czysci konsole
                 b.insert(200, 26, Convert.ToString(ms / 10 + " s"));    // wypisuje czas trwania programu
                 b.insert(212, 51, Convert.ToString("."));               // wypisuje nic na koncu okna
 
@@ -650,31 +755,35 @@ namespace Kontrola_Lotów
                 {
                     char wybor = Console.ReadKey().KeyChar;
                     if (lot >= 0) switch (wybor)
-                    {
-                        case '0': b.czyscKonsole(); lot = -1; break;
-                        case '1': if (radar.s[lot].trajektoria < 1) radar.s[lot].trajektoria++; else radar.s[lot].trajektoria--; break;
-                        case '2': radar.s[lot].zmienTrajektorie(radar.skala); break;
-                    }                                        // zarzadzanie lotem
-                    else if (wybor - 49 >= 0 && wybor - 49 < 10 && wybor - 49 <= radar.s.Count && radar.run>0)
+                        {
+                            case '0': b.czyscKonsole(); lot = -1; break;
+                            case '1': if (radar.s[lot].trajektoria < 1) radar.s[lot].trajektoria++; else radar.s[lot].trajektoria--; break;
+                            case '2': radar.s[lot].zmienTrajektorie(radar.skala); break;
+                        }                                        // zarzadzanie lotem
+                    else if (wybor - 49 >= 0 && wybor - 49 < 10 && wybor - 49 <= radar.s.Count && radar.run > 0)
                     {
                         b.czyscKonsole();
                         lot = wybor - 49;
                         if (radar.s.Count < lot + 1) lot = -1;
                     }   // wypisuje info o danym locie
                     else switch (wybor)
-                    {
-                        case 'q': System.Diagnostics.Process.GetCurrentProcess().Kill(); break;     // zabija aplikacje
-                        case 'e': b.pokaFax(); break;                                               // info o wlascicielach
-                        case 'w': losowySamolot = new Trasa(1, 2, 0, 0, 200); break;                // pusc samolot
-                        case 'r': radar.run *= -1; radar.pokaSkale(); break;                        // wlaczy/wylacz radar
-                        case '.': if (time > 15) time -= 15; break;                                 // przyspiesz czas
-                        case ',': time += 15; break;                                                // spowolnij czas
-                        case '/': time = 100; break;                                                // ustaw domyslny czas
-                        case 'm': radar.zmienMape(radar.run);  break;                                        // zmienia mape
-                        case 'g': if (gener == 0) gener = 1; else gener = 0; break;                 // generuje lot
-                        case 'b': if (radar.skala > 1) b.pokaListeBudynkow(radar); break;           // generuje lot
-                        case 'x': break;        // 
-                    }
+                        {
+                            case 'q': System.Diagnostics.Process.GetCurrentProcess().Kill(); break;     // zabija aplikacje
+                            case 'e': b.pokaFax(); break;                                               // info o wlascicielach
+                            case 'w': losowySamolot = new Trasa(1, 2, 0, 0, 200); break;                // pusc samolot
+                            case 'r': radar.run *= -1; radar.pokaSkale(); break;                        // wlaczy/wylacz radar
+                            case '.': if (time > 15) time -= 15; break;                                 // przyspiesz czas
+                            case ',': time += 15; break;                                                // spowolnij czas
+                            case '/': time = 100; break;                                                // ustaw domyslny czas
+                            case 'm': radar.zmienMape(radar.run); break;                                        // zmienia mape
+                            case 'g': if (gener == 0) gener = 1; else gener = 0; break;                 // generuje lot
+                            case 'b': if (radar.skala > 1) b.pokaListeBudynkow(radar); break;           // generuje lot
+                            case 's': b.zapis(radar); break;                                            // zapis do pliku
+                            case 'k': radar.Kolizja(); break;                                           // kurs kolizyjny
+                            case 'n': radar.NiebezpieczneZblizenia(); break;                            // niebezpieczne zblizenie
+                            case 'x': radar.zderzonko(); break;
+                            case 'c': radar.trajektorki(); break;
+                        }
                 }
                 Thread.Sleep(time);
                 ms++;
